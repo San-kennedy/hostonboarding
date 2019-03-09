@@ -1,0 +1,30 @@
+---
+- hosts: all
+  remote_user: <username of ssh ansible user>
+  tasks:
+  - name: Gather minimum set of information about host
+    vars:
+      vm_conf:
+        _id: "{{hostvars[inventory_hostname].instance_id}}"
+        instance_type: "{{hostvars[inventory_hostname].instance_type}}"
+        nodename: "{{ansible_nodename}}"
+        vcpu: "{{ansible_processor_vcpus}}"
+        memory: "{{ansible_memtotal_mb}}"
+        swap : "{{ansible_memory_mb.swap.total}}"
+        mounts: "{{ansible_mounts}}"
+        ipv4: "{{ansible_all_ipv4_addresses}}"
+        interfaces: "{{ansible_interfaces}}"
+        env: "{{env}}"
+        location: "{{location}}"
+        os :
+          os_family: "{{ansible_os_family}}"
+          os_distribution: "{{ ansible_distribution }}"
+          os_distribution_ver: "{{ ansible_distribution_version }}"
+          os_release: "{{ansible_distribution_release}}"
+          os_kernel: "{{ansible_kernel}}"
+          os_pkgmgr: "{{ansible_pkg_mgr}}"
+        uptime: "{{ansible_uptime_seconds}}"
+    local_action: command ./fact2mongo.py -d '{{ vm_conf | to_json}}'
+
+# please make sure the fact2mongo.py file is in the same directory where the playbook is run
+# or change the path accordingly
